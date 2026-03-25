@@ -1,65 +1,12 @@
 "use client";
 
-import { Check, MapPin, CreditCard, Smartphone, Camera, IceCream, Download, Loader2 } from "lucide-react";
+import { Check, MapPin, CreditCard, Smartphone, Camera, IceCream } from "lucide-react";
 import { motion } from "motion/react";
-import { useRef, useState } from "react";
 
 export default function ProposalPage() {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-
-  const generatePDF = async () => {
-    if (!contentRef.current) return;
-    setIsGeneratingPDF(true);
-    try {
-      const html2canvasModule = await import("html2canvas");
-      const html2canvas = html2canvasModule.default || (html2canvasModule as any);
-      const { jsPDF } = await import("jspdf");
-
-      const canvas = await html2canvas(contentRef.current, {
-        scale: 1, // Reduzido para 1 para evitar limite de tamanho do canvas (tela branca)
-        useCORS: true,
-        logging: false,
-        windowWidth: 1200,
-        windowHeight: contentRef.current.scrollHeight,
-        scrollY: 0,
-        onclone: (document) => {
-          const style = document.createElement('style');
-          style.innerHTML = `
-            * {
-              opacity: 1 !important;
-              transform: none !important;
-              animation: none !important;
-              transition: none !important;
-            }
-          `;
-          document.head.appendChild(style);
-        }
-      });
-      
-      const imgData = canvas.toDataURL("image/jpeg", 0.90);
-      const pdfWidth = canvas.width;
-      const pdfHeight = canvas.height;
-      
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "px",
-        format: [pdfWidth, pdfHeight],
-      });
-      
-      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save("proposta-google-meu-negocio-gui-delicias-25.03.pdf");
-    } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
-      alert("Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.");
-    } finally {
-      setIsGeneratingPDF(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#f8f9fa] font-sans text-[#3c4043] selection:bg-[#e8f0fe]">
-      <div ref={contentRef} className="bg-[#f8f9fa]">
+      <div className="bg-[#f8f9fa]">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#dadce0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -293,25 +240,6 @@ export default function ProposalPage() {
         <p>© 2026 Google Perfil Empresa. Todos os direitos reservados.</p>
       </footer>
       </div>
-
-      {/* Floating PDF Download Button */}
-      <button
-        onClick={generatePDF}
-        disabled={isGeneratingPDF}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white px-6 py-3 rounded-full shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed font-medium"
-      >
-        {isGeneratingPDF ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Gerando PDF...
-          </>
-        ) : (
-          <>
-            <Download className="w-5 h-5" />
-            Baixar PDF
-          </>
-        )}
-      </button>
     </div>
   );
 }

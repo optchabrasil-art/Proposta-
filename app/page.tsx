@@ -12,14 +12,16 @@ export default function ProposalPage() {
     if (!contentRef.current) return;
     setIsGeneratingPDF(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
+      const html2canvasModule = await import("html2canvas");
+      const html2canvas = html2canvasModule.default || (html2canvasModule as any);
       const { jsPDF } = await import("jspdf");
 
       const canvas = await html2canvas(contentRef.current, {
-        scale: 2,
+        scale: 1, // Reduzido para 1 para evitar limite de tamanho do canvas (tela branca)
         useCORS: true,
         logging: false,
         windowWidth: 1200,
+        windowHeight: contentRef.current.scrollHeight,
         scrollY: 0,
         onclone: (document) => {
           const style = document.createElement('style');
@@ -35,9 +37,9 @@ export default function ProposalPage() {
         }
       });
       
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      const pdfWidth = canvas.width / 2;
-      const pdfHeight = canvas.height / 2;
+      const imgData = canvas.toDataURL("image/jpeg", 0.90);
+      const pdfWidth = canvas.width;
+      const pdfHeight = canvas.height;
       
       const pdf = new jsPDF({
         orientation: "portrait",
